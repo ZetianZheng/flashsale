@@ -1,8 +1,8 @@
 package com.zane.flashsale;
 
-import com.zane.flashsale.db.dao.flashsaleActivityDao;
-import com.zane.flashsale.db.mappers.flashsaleActivityMapper;
-import com.zane.flashsale.db.po.flashsaleActivity;
+import com.zane.flashsale.db.dao.FlashSaleActivityDao;
+import com.zane.flashsale.db.mappers.FlashSaleActivityMapper;
+import com.zane.flashsale.db.po.FlashSaleActivity;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -15,14 +15,14 @@ import java.util.List;
 public class DaoTest {
 
     @Resource
-    private flashsaleActivityMapper flashsaleActivityMapper;
+    private FlashSaleActivityMapper flashsaleActivityMapper;
 
     @Autowired
-    private flashsaleActivityDao flashsaleActivityDao;
+    private FlashSaleActivityDao flashsaleActivityDao;
 
     @Test
     void flashsaleActivityTest() {
-        flashsaleActivity flashsaleActivity = new flashsaleActivity();
+        FlashSaleActivity flashsaleActivity = new FlashSaleActivity();
         flashsaleActivity.setName("测试");
         flashsaleActivity.setCommodityId(999L);
         flashsaleActivity.setTotalStock(100L);
@@ -38,7 +38,7 @@ public class DaoTest {
 
     @Test
     void setflashsaleActivityQuery(){
-        List<flashsaleActivity> flashsaleActivitys =
+        List<FlashSaleActivity> flashsaleActivitys =
                 flashsaleActivityDao.queryflashsaleActivitysByStatus(0);
 
         System.out.println(flashsaleActivitys.size());

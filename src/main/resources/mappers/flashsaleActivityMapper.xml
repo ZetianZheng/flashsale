@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zane.flashsale.db.mappers.flashsaleActivityMapper">
-  <resultMap id="BaseResultMap" type="com.zane.flashsale.db.po.flashsaleActivity">
+<mapper namespace="com.zane.flashsale.db.mappers.FlashSaleActivityMapper">
+  <resultMap id="BaseResultMap" type="com.zane.flashsale.db.po.FlashSaleActivity">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="name" jdbcType="VARCHAR" property="name" />
     <result column="commodity_id" jdbcType="BIGINT" property="commodityId" />
@@ -28,7 +28,7 @@
     delete from flashsale_activity
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.zane.flashsale.db.po.flashsaleActivity">
+  <insert id="insert" parameterType="com.zane.flashsale.db.po.FlashSaleActivity">
     insert into flashsale_activity (id, name, commodity_id, 
       old_price, flashsale_price, activity_status, 
       start_time, end_time, total_stock, 
@@ -38,7 +38,7 @@
       #{startTime,jdbcType=TIMESTAMP}, #{endTime,jdbcType=TIMESTAMP}, #{totalStock,jdbcType=BIGINT}, 
       #{availableStock,jdbcType=INTEGER}, #{lockStock,jdbcType=BIGINT})
   </insert>
-  <insert id="insertSelective" parameterType="com.zane.flashsale.db.po.flashsaleActivity">
+  <insert id="insertSelective" parameterType="com.zane.flashsale.db.po.FlashSaleActivity">
     insert into flashsale_activity
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -111,7 +111,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.zane.flashsale.db.po.flashsaleActivity">
+  <update id="updateByPrimaryKeySelective" parameterType="com.zane.flashsale.db.po.FlashSaleActivity">
     update flashsale_activity
     <set>
       <if test="name != null">
@@ -147,7 +147,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.zane.flashsale.db.po.flashsaleActivity">
+  <update id="updateByPrimaryKey" parameterType="com.zane.flashsale.db.po.FlashSaleActivity">
     update flashsale_activity
     set name = #{name,jdbcType=VARCHAR},
       commodity_id = #{commodityId,jdbcType=BIGINT},

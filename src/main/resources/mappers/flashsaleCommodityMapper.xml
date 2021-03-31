@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="com.zane.flashsale.db.mappers.flashsaleCommodityMapper">
-  <resultMap id="BaseResultMap" type="com.zane.flashsale.db.po.flashsaleCommodity">
+<mapper namespace="com.zane.flashsale.db.mappers.FlashSaleCommodityMapper">
+  <resultMap id="BaseResultMap" type="com.zane.flashsale.db.po.FlashSaleCommodity">
     <id column="id" jdbcType="BIGINT" property="id" />
     <result column="commodity_name" jdbcType="VARCHAR" property="commodityName" />
     <result column="commodity_desc" jdbcType="VARCHAR" property="commodityDesc" />
@@ -20,13 +20,13 @@
     delete from flashsale_commodity
     where id = #{id,jdbcType=BIGINT}
   </delete>
-  <insert id="insert" parameterType="com.zane.flashsale.db.po.flashsaleCommodity">
+  <insert id="insert" parameterType="com.zane.flashsale.db.po.FlashSaleCommodity">
     insert into flashsale_commodity (id, commodity_name, commodity_desc, 
       commodity_price)
     values (#{id,jdbcType=BIGINT}, #{commodityName,jdbcType=VARCHAR}, #{commodityDesc,jdbcType=VARCHAR}, 
       #{commodityPrice,jdbcType=INTEGER})
   </insert>
-  <insert id="insertSelective" parameterType="com.zane.flashsale.db.po.flashsaleCommodity">
+  <insert id="insertSelective" parameterType="com.zane.flashsale.db.po.FlashSaleCommodity">
     insert into flashsale_commodity
     <trim prefix="(" suffix=")" suffixOverrides=",">
       <if test="id != null">
@@ -57,7 +57,7 @@
       </if>
     </trim>
   </insert>
-  <update id="updateByPrimaryKeySelective" parameterType="com.zane.flashsale.db.po.flashsaleCommodity">
+  <update id="updateByPrimaryKeySelective" parameterType="com.zane.flashsale.db.po.FlashSaleCommodity">
     update flashsale_commodity
     <set>
       <if test="commodityName != null">
@@ -72,7 +72,7 @@
     </set>
     where id = #{id,jdbcType=BIGINT}
   </update>
-  <update id="updateByPrimaryKey" parameterType="com.zane.flashsale.db.po.flashsaleCommodity">
+  <update id="updateByPrimaryKey" parameterType="com.zane.flashsale.db.po.FlashSaleCommodity">
     update flashsale_commodity
     set commodity_name = #{commodityName,jdbcType=VARCHAR},
       commodity_desc = #{commodityDesc,jdbcType=VARCHAR},
