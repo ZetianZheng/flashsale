@@ -19,7 +19,7 @@ public class FlashSaleActivityDaoImpl implements FlashSaleActivityDao {
     }
 
     @Override
-    public void inertflashsaleActivity(FlashSaleActivity flashsaleActivity) {
+    public void insertFlashSaleActivity(FlashSaleActivity flashsaleActivity) {
         flashsaleActivityMapper.insert(flashsaleActivity);
     }
 

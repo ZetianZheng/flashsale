@@ -8,7 +8,7 @@ public interface FlashSaleActivityDao {
 
     public List<FlashSaleActivity> queryflashsaleActivitysByStatus(int activityStatus);
 
-    public void inertflashsaleActivity(FlashSaleActivity flashsaleActivity);
+    public void insertFlashSaleActivity(FlashSaleActivity flashsaleActivity);
 
     public FlashSaleActivity queryflashsaleActivityById(long activityId);
 
