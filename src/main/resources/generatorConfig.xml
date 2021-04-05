@@ -63,17 +63,17 @@
 
         </javaClientGenerator>
 
-        <table schema="" tableName="flashsale_activity"
+        <table schema="" tableName="flashsale_order"
 
-               domainObjectName="flashsaleActivity" enableCountByExample="false"
+               domainObjectName="FlashSaleOrder" enableCountByExample="false"
 
                enableDeleteByExample="false" enableSelectByExample="false"
 
                enableUpdateByExample="false" selectByExampleQueryId="false"></table>
 
-        <table schema="" tableName="flashsale_commodity"
+        <table schema="" tableName="flashsale_user"
 
-               domainObjectName="flashsaleCommodity" enableCountByExample="false"
+               domainObjectName="FlashSaleUser" enableCountByExample="false"
 
                enableDeleteByExample="false" enableSelectByExample="false"
 

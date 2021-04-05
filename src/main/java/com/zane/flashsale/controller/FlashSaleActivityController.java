@@ -1,4 +1,4 @@
-package com.zane.flashsale.web;
+package com.zane.flashsale.controller;
 
 import com.zane.flashsale.db.dao.FlashSaleActivityDao;
 import com.zane.flashsale.db.dao.FlashSaleCommodityDao;
