@@ -1,5 +1,6 @@
 package com.zane.flashsale.utl;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import redis.clients.jedis.Jedis;
@@ -7,6 +8,7 @@ import redis.clients.jedis.JedisPool;
 
 import java.util.Collections;
 
+@Slf4j
 @Service
 public class RedisService {
     @Autowired
@@ -74,15 +76,15 @@ public class RedisService {
             Long stock = (Long) jedisClient.eval(script, Collections.singletonList(key), Collections.emptyList());
 
             if (stock < 0) {
-                System.out.println("sold out!");
+                log.info("sold out!");
                 return false;
             } else {
-                System.out.println("congratulations! you get commodity!");
+                log.info("congratulations! you get commodity!");
             }
 
             return true;
         } catch (Throwable throwable) {
-            System.out.println("stock deduct failed!: " + throwable.toString());
+            log.error("stock deduct failed!: " + throwable.toString());
 
             return false;
         }

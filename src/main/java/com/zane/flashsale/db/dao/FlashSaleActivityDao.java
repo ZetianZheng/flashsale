@@ -13,4 +13,8 @@ public interface FlashSaleActivityDao {
     public FlashSaleActivity queryflashsaleActivityById(long activityId);
 
     public void updateflashsaleActivity(FlashSaleActivity flashsaleActivity);
+
+    boolean lockStock(Long flashSaleActivityId);
+
+    boolean deductStock(Long flashsaleActivityId);
 }

@@ -3,6 +3,7 @@ package com.zane.flashsale;
 import com.zane.flashsale.db.dao.FlashSaleActivityDao;
 import com.zane.flashsale.db.mappers.FlashSaleActivityMapper;
 import com.zane.flashsale.db.po.FlashSaleActivity;
+import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -11,6 +12,7 @@ import javax.annotation.Resource;
 import java.math.BigDecimal;
 import java.util.List;
 
+@Slf4j
 @SpringBootTest
 public class DaoTest {
 
@@ -45,6 +47,11 @@ public class DaoTest {
 
         flashsaleActivitys.stream().forEach(flashsaleActivity ->
                 System.out.println(flashsaleActivity.toString()));
+    }
+
+    @Test
+    public void test4j() {
+        log.info("info");
     }
 
 }

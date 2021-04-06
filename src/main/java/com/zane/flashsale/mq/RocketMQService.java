@@ -19,7 +19,6 @@ public class RocketMQService {
      * */
     public void sendMessage(String topic, String body) throws Exception{
         Message message = new Message(topic, body.getBytes());
-        System.out.println(message);
         rocketMQTemplate.getProducer().send(message);
     }
 

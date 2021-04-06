@@ -12,7 +12,7 @@ import java.util.List;
 
 /**
  * runner will get execute just after application context i created and before spring boot application start up.
- * it accept arguments, which are passed at time of server start up.
+ * it accept arguments, which are passed while server start up.
  */
 @Component
 public class RedisPreheatRunner implements ApplicationRunner {

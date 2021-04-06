@@ -127,11 +127,10 @@
     where id = #{id,jdbcType=BIGINT}
   </update>
 
-  <select id="selectByOrderNo" parameterType="java.lang.String"
-  resultMap="BaseResultMap">
+  <select id="selectByOrderNo" parameterType="java.lang.String" resultMap="BaseResultMap">
     select
     <include refid="Base_Column_List"/>
     from flashsale_order
-    where order_no = #{orderNo, jdbcType=BIGINT}
+    where order_no = #{orderNo,jdbcType=BIGINT}
   </select>
 </mapper>

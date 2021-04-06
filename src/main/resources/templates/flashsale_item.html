@@ -122,7 +122,8 @@
 				</div>
 				<div class="fr itemInfo-wrap">
 					<div class="sku-name">
-						<h4 th:text="${flashSaleCommodity.commodityName}"></h4>
+						<!--<h4 th:text="${flashSaleCommodity.commodityName}"></h4>-->
+						<h4 th:text="${flashSaleActivity.name}"></h4>
 					</div>
 					<div class="news">
 						<span><img src="/img/_/clock.png"/>九章秒杀</span>
@@ -245,7 +246,7 @@
 							<div class="fl">
 								<ul class="btn-choose unstyled">
 									<li>
-										<a th:href="'/seckill/buy/1234/' + ${flashSaleActivity.id}" target="_blank"
+										<a th:href="'/flashsale/buy/1234/' + ${flashSaleActivity.id}" target="_blank"
 										   class="addshopcar">立即购买</a>
 									</li>
 								</ul>
@@ -470,7 +471,7 @@
 						<div class="clearfix"></div>
 						<div class="tab-content tab-wraped">
 							<div id="one" class="tab-pane active">
-								<ul class="goods-intro unstyled" th:text="${flashSaleCommodity.commodityDesc}"></ul>
+								<!--<ul class="goods-intro unstyled" th:text="${flashSaleCommodity.commodityDesc}"></ul>-->
 								<ul class="goods-intro unstyled">
 									<li>分辨率：1920*1080(FHD)</li>
 									<li>后置摄像头：1200万像素</li>
