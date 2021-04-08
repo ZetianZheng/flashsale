@@ -2,8 +2,10 @@ package com.zane.flashsale.services;
 
 import com.alibaba.fastjson.JSON;
 import com.zane.flashsale.db.dao.FlashSaleActivityDao;
+import com.zane.flashsale.db.dao.FlashSaleCommodityDao;
 import com.zane.flashsale.db.dao.OrderDao;
 import com.zane.flashsale.db.po.FlashSaleActivity;
+import com.zane.flashsale.db.po.FlashSaleCommodity;
 import com.zane.flashsale.db.po.FlashSaleOrder;
 import com.zane.flashsale.mq.RocketMQService;
 import com.zane.flashsale.utl.RedisService;
@@ -22,6 +24,9 @@ public class FLashSaleActivityService {
 
     @Autowired
     private FlashSaleActivityDao flashSaleActivityDao;
+
+    @Autowired
+    private FlashSaleCommodityDao flashSaleCommodityDao;
 
     @Autowired
     private RocketMQService rocketMQService;
@@ -103,6 +108,18 @@ public class FLashSaleActivityService {
 
         // send payment completed message:
         rocketMQService.sendMessage("pay_done", JSON.toJSONString(order));
+    }
+
+    /**
+     *  put flash sale commodity and activity information into redis for cache warming
+     *
+     */
+    public void pushFlashSaleInfoToRedis(long flashsaleActivityId) {
+        FlashSaleActivity flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(flashsaleActivityId);
+        redisService.setValue("flashSaleActivityId:"+flashsaleActivityId, JSON.toJSONString(flashSaleActivity));
+
+        FlashSaleCommodity flashSaleCommodity = flashSaleCommodityDao.queryflashsaleCommodityById(flashSaleActivity.getCommodityId());
+        redisService.setValue("flashSaleCommodityId:"+flashSaleActivity.getCommodityId(), JSON.toJSONString(flashSaleCommodity));
     }
 
 }

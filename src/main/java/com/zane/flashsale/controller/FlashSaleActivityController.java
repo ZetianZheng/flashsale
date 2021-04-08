@@ -1,5 +1,9 @@
 package com.zane.flashsale.controller;
 
+import com.alibaba.csp.sentinel.Entry;
+import com.alibaba.csp.sentinel.SphU;
+import com.alibaba.csp.sentinel.slots.block.BlockException;
+import com.alibaba.fastjson.JSON;
 import com.zane.flashsale.db.dao.FlashSaleActivityDao;
 import com.zane.flashsale.db.dao.FlashSaleCommodityDao;
 import com.zane.flashsale.db.dao.OrderDao;
@@ -9,16 +13,19 @@ import com.zane.flashsale.db.po.FlashSaleOrder;
 import com.zane.flashsale.services.FLashSaleActivityService;
 import com.zane.flashsale.utl.RedisService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.servlet.ModelAndView;
 
 import java.math.BigDecimal;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -103,20 +110,30 @@ public class FlashSaleActivityController {
 
     /**
      * item lists, get all active items and display them
+     * use sentinel to protect this service
      * @param resultMap
      * @return flashsale_activity
      */
     @RequestMapping("/flashsales")
     public String activityList(Map<String, Object> resultMap) {
-        List<FlashSaleActivity> flashSaleActivities = flashSaleActivityDao.queryflashsaleActivitysByStatus(1); // 0 下架，1 正常
-        resultMap.put("flashSaleActivities", flashSaleActivities);
-        return "flashsale_activity";
+        try (Entry entry = SphU.entry("flashSalesResource")) {
+            // resources under protection
+            List<FlashSaleActivity> flashSaleActivities = flashSaleActivityDao.queryflashsaleActivitysByStatus(1); // 0 下架，1 正常
+            resultMap.put("flashSaleActivities", flashSaleActivities);
+            return "flashsale_activity";
+        } catch (BlockException ex) {
+            log.error(ex.toString());
+            return "wait";
+        }
+
     }
 
 
     /**
      * item's details page
      * render result map
+     * 增加缓存预热： 去掉最前面两行直接从数据库中读写，使用redis进行缓存预热 详见代码解释
+     * 增加sentinel流量控制，丢掉一些过多的请求。
      * @param resultMap
      * @param flashSaleActivityId
      * @return flashsale_item
@@ -124,19 +141,53 @@ public class FlashSaleActivityController {
     @RequestMapping("/item/{flashSaleActivityId}")
     public String itemPage(Map<String, Object> resultMap,
                            @PathVariable long flashSaleActivityId) {
-        FlashSaleActivity flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(flashSaleActivityId); // get activity by id
-        FlashSaleCommodity flashSaleCommodity = flashSaleCommodityDao.queryflashsaleCommodityById(flashSaleActivity.getCommodityId()); // get commodity by its' id
+        try (Entry entry = SphU.entry("FlashSaleItemResource")) {
+            //        FlashSaleActivity flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(flashSaleActivityId); // get activity by id
+            //        FlashSaleCommodity flashSaleCommodity = flashSaleCommodityDao.queryflashsaleCommodityById(flashSaleActivity.getCommodityId()); // get commodity by id
 
-        resultMap.put("flashSaleActivity", flashSaleActivity);
-        resultMap.put("flashSaleCommodity", flashSaleCommodity);
-        resultMap.put("flashSalePrice", flashSaleActivity.getFlashsalePrice());
-        resultMap.put("oldPrice", flashSaleActivity.getOldPrice());
+            // 被保护的代码
+            FlashSaleActivity flashSaleActivity;
+            FlashSaleCommodity flashSaleCommodity;
 
-        resultMap.put("commodityId", flashSaleActivity.getCommodityId());
-//        resultMap.put("commodityName", flashSaleCommodity.getCommodityName());
-//        resultMap.put("commodityDesc", flashSaleCommodity.getCommodityDesc());
+            /**
+             * 缓存预热
+             * 秒杀活动信息商品信息写入redis缓存中。访问的时候先去缓存查询是否有缓存，没有再去数据库查询。
+             */
+            // flash sale activity redis 缓存预热
+            String flashSaleActivityInfo = redisService.getValue("flashSaleActivityId:" + flashSaleActivityId);
+            if (StringUtils.isNotEmpty(flashSaleActivityInfo)) {
+                log.info("redis缓存数据:" + flashSaleActivityInfo);
+                flashSaleActivity = JSON.parseObject(flashSaleActivityInfo, FlashSaleActivity.class); // parse JSON string to java objects.
+            } else {
+                flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(flashSaleActivityId); // get activity by id
+            }
+            // flash sale commodity redis 缓存预热
+            String flashSaleCommodityInfo = redisService.getValue("flashSaleCommodityId:" + flashSaleActivity.getCommodityId());
+            if (StringUtils.isNotEmpty(flashSaleCommodityInfo)) {
+                log.info("redis缓存数据:" + flashSaleCommodityInfo);
+                flashSaleCommodity = JSON.parseObject(flashSaleCommodityInfo, FlashSaleCommodity.class); // parse JSON string to java objects.
+            } else {
+                flashSaleCommodity = flashSaleCommodityDao.queryflashsaleCommodityById(flashSaleActivity.getCommodityId()); // get commodity by id
+            }
 
-        return "flashsale_item";
+            /**
+             *  result map 获取data 并渲染网页
+             */
+            resultMap.put("flashSaleActivity", flashSaleActivity);
+            resultMap.put("flashSaleCommodity", flashSaleCommodity);
+            resultMap.put("flashSalePrice", flashSaleActivity.getFlashsalePrice());
+            resultMap.put("oldPrice", flashSaleActivity.getOldPrice());
+
+            resultMap.put("commodityId", flashSaleActivity.getCommodityId());
+            resultMap.put("commodityName", flashSaleCommodity.getCommodityName());
+            resultMap.put("commodityDesc", flashSaleCommodity.getCommodityDesc());
+
+            return "flashsale_item";
+        } catch (BlockException ex) {
+            // 降级到wait 页面。
+            log.error(ex.toString());
+            return "wait";
+        }
     }
 
     /**
@@ -210,11 +261,34 @@ public class FlashSaleActivityController {
         return modelAndView;
     }
 
+    /**
+     * pay order by payOrder process
+     * @param orderNo
+     * @return
+     * @throws Exception
+     */
     @RequestMapping("/flashsale/payOrder/{orderNo}")
     public String payOrder(@PathVariable String orderNo) throws Exception{
         log.info("paying order: " + orderNo);
         fLashSaleActivityService.payOrderProcess(orderNo);
         return "redirect:/flashsale/orderQuery/" + orderNo;
+    }
+
+
+    /**
+     * return server time to frontend.
+     * frontend will poll() update time and obtain rest time to open flash sale activity.
+     * @return
+     */
+    @ResponseBody
+    @RequestMapping("/flashsale/getSystemTime")
+    public String getSystemTime() {
+        // set date format
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+
+        // new date() get server time
+        String date = df.format(new Date());
+        return date;
     }
 
 }
