@@ -22,4 +22,6 @@ public interface FlashSaleActivityMapper {
     int lockStock(Long flashSaleActivityId);
 
     int deductStock(Long flashsaleActivityId);
+
+    int revertStock(Long flashsaleActivityId);
 }

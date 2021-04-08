@@ -40,7 +40,8 @@ public class OrderConsumer implements RocketMQListener<MessageExt> {
         FlashSaleOrder order = JSON.parseObject(message, FlashSaleOrder.class); // deserialize json into FlashSaleOrder
         order.setCreateTime(new Date());
 
-        // 2. deduct and lock stock
+        // 2. deduct available stock and lock stock
+        // return 1: success
         boolean lockStockResult = flashSaleActivityDao.lockStock(order.getFlashsaleActivityId());
         // 0: no available stock, order create failed, 1: order create success, waiting for payment
         if (lockStockResult) {

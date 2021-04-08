@@ -7,6 +7,7 @@ import com.zane.flashsale.db.po.FlashSaleActivity;
 import com.zane.flashsale.db.po.FlashSaleCommodity;
 import com.zane.flashsale.db.po.FlashSaleOrder;
 import com.zane.flashsale.services.FLashSaleActivityService;
+import com.zane.flashsale.utl.RedisService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
@@ -36,6 +37,9 @@ public class FlashSaleActivityController {
 
     @Autowired
     OrderDao orderDao;
+
+    @Autowired
+    RedisService redisService;
 
     /**
      * add item page
@@ -154,15 +158,26 @@ public class FlashSaleActivityController {
         modelAndView.setViewName("flashsale_result");
 
         try {
+
+            /**
+             * whether or not that user in the limit member list
+             */
+            if (redisService.isInLimitMember(flashsaleActivityId, userId)) {
+                modelAndView.addObject("resultInfo", "sorry, you are in the limit member list! every customer can only buy once!");
+                return modelAndView;
+            }
+            /**
+             * whether or not that user can flash sale(judge stock)
+             */
             stockValidateResult = fLashSaleActivityService.flashSaleStockValidator(flashsaleActivityId);
             if (stockValidateResult) {
                 FlashSaleOrder flashSaleOrder = fLashSaleActivityService.createOrder(flashsaleActivityId, userId);
                 modelAndView.addObject("resultInfo", "success, order has been created, the orderId: " + flashSaleOrder.getOrderNo());
                 modelAndView.addObject("orderNo", flashSaleOrder.getOrderNo());
-                log.info("orderNo has been generated: " + flashSaleOrder.getOrderNo());
+                // add user in limit member list
+                redisService.addLimitMember(flashsaleActivityId, userId);
             } else {
                 modelAndView.addObject("resultInfo", "failed, no available stock!");
-                log.info("no available stock!");
             }
         } catch(Exception e) {
             log.error("system abnormal: " + e.toString());
@@ -189,7 +204,7 @@ public class FlashSaleActivityController {
             FlashSaleActivity flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(order.getFlashsaleActivityId());
             modelAndView.addObject("flashSaleActivity", flashSaleActivity);
         } else {
-            modelAndView.setViewName("order_wait");
+            modelAndView.setViewName("wait");
         }
 
         return modelAndView;

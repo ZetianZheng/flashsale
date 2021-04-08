@@ -56,4 +56,12 @@ public class FlashSaleActivityDaoImpl implements FlashSaleActivityDao {
 
         return true;
     }
+
+    @Override
+    public void revertStock(Long flashsaleActivityId) {
+        int result = flashsaleActivityMapper.revertStock(flashsaleActivityId);
+        if (result < 1) {
+            log.info("revertStock failed!");
+        }
+    }
 }

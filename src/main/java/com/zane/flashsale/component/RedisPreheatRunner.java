@@ -24,8 +24,10 @@ public class RedisPreheatRunner implements ApplicationRunner {
 
     @Override
     public void run(ApplicationArguments args) throws Exception {
+        // get all cols which status == 1 from flashsale_activity
         List<FlashSaleActivity> flashSaleActivities = flashSaleActivityDao.queryflashsaleActivitysByStatus(1);
 
+        // add all these data to redis
         for (FlashSaleActivity flashSaleActivity : flashSaleActivities) {
             redisService.setValue("stock:" + flashSaleActivity.getId(), (long)flashSaleActivity.getAvailableStock());
         }

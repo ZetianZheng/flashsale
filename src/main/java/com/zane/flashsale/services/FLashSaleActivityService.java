@@ -56,7 +56,6 @@ public class FLashSaleActivityService {
      * @return
      * @throws Exception
      */
-
     public FlashSaleOrder createOrder(long flashSaleActivityId, long userId) throws Exception {
         // 1. create the order
         FlashSaleActivity flashSaleActivity = flashSaleActivityDao.queryflashsaleActivityById(flashSaleActivityId);
@@ -70,8 +69,12 @@ public class FLashSaleActivityService {
 
         // 3. send created order message
         rocketMQService.sendMessage("flashsale_order", JSON.toJSONString(flashSaleOrder));
-        log.info("order message sent!: flashsale_order");
 
+        /**
+         * 4. send delay message to check order status after 1m
+         * broker: messageDelayLevel: 1s, 5s, 10s, 30s, 1m 2m 3m 4m 5m 6m 7m 8m 9m 10m 20m 30m 1h 2h
+         */
+        rocketMQService.sendDelayMessage("pay_status_check", JSON.toJSONString(flashSaleOrder), 5);
         return flashSaleOrder;
     }
 
@@ -80,16 +83,26 @@ public class FLashSaleActivityService {
      * before this step, we only lock stock and wait for payment.
      * @param orderNo
      */
-    public void payOrderProcess(String orderNo) {
+    public void payOrderProcess(String orderNo) throws Exception{
         log.info("complete payment, orderNo: " + orderNo);
-        FlashSaleOrder order = orderDao.queryOrder(orderNo); // get order by its' order number
-        boolean deductStockResult = flashSaleActivityDao.deductStock(order.getFlashsaleActivityId()); // deduct stock
-        if (deductStockResult) {
-            order.setPayTime(new Date());
-            // 0: no available stock, invalid order, 1: order generated, waiting for payment, 2: accomplish payment
-            order.setOrderStatus(2);
-            orderDao.updateOrder(order);
+        FlashSaleOrder order = orderDao.queryOrder(orderNo); // get order by its' order
+        /*
+        whether or not this order exists
+         */
+        if (order == null) {
+            log.error("this order not exists: " + orderNo);
+            return;
         }
+        /*
+        payment complete
+         */
+        order.setPayTime(new Date());
+        // 0: no available stock, invalid order, 1: order generated, waiting for payment, 2: accomplish payment
+        order.setOrderStatus(2);
+        orderDao.updateOrder(order);
+
+        // send payment completed message:
+        rocketMQService.sendMessage("pay_done", JSON.toJSONString(order));
     }
 
 }

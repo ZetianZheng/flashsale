@@ -89,4 +89,46 @@ public class RedisService {
             return false;
         }
     }
+
+    /**
+     * add limit member to sets stored at KEY
+     * @param activityId
+     * @param userId
+     */
+    public void addLimitMember(long activityId, long userId) {
+        // 1. get resource from jedis pool
+        Jedis jedisClient = jedisPool.getResource();
+
+        // 2. sadd users to limit them to the specific flash sale activity(one user only can buy one item in one activity)
+        // Q: what if we want to limit each person 5 items?
+        jedisClient.sadd("flashSaleActivity_users:"+activityId, String.valueOf(userId));
+    }
+
+    /**
+     * whether user is in the set
+     * @param activityId
+     * @param userId
+     * @return
+     */
+    public boolean isInLimitMember(long activityId, long userId) {
+        Jedis jedisClient = jedisPool.getResource();
+        boolean sismember = jedisClient.sismember("flashSaleActivity_users:"+activityId, String.valueOf(userId));
+        log.info("userId: {} activityId: {} is member {}", userId, activityId, sismember);
+        return sismember;
+    }
+
+    /**
+     * remove member from redis set
+     * @param flashsaleActivityId
+     * @param userId
+     */
+    public void removeLimitMember(Long flashsaleActivityId, Long userId) {
+        // 1. get resource from jedis pool
+        Jedis jedisClient = jedisPool.getResource();
+
+        // 2. remove users from the set of redis stored at key
+        // Q: what if we want to limit each person 5 items?
+        jedisClient.srem("flashSaleActivity_users:"+flashsaleActivityId, String.valueOf(userId));
+    }
+
 }

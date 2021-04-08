@@ -1,10 +1,12 @@
 package com.zane.flashsale.mq;
 
+import lombok.extern.slf4j.Slf4j;
 import org.apache.rocketmq.common.message.Message;
 import org.apache.rocketmq.spring.core.RocketMQTemplate;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+@Slf4j
 @Service
 public class RocketMQService {
 
@@ -24,6 +26,7 @@ public class RocketMQService {
 
     /**
      * 发送延时消息
+     * body.getBytes() 将消息体转换为字节流
      * @param topic
      * @param body
      * @param delayTimeLevel
@@ -32,6 +35,7 @@ public class RocketMQService {
         Message message = new Message(topic, body.getBytes());
         message.setDelayTimeLevel(delayTimeLevel);
         rocketMQTemplate.getProducer().send(message);
+        log.info("delay message {} checked!", topic);
     }
 
 }
